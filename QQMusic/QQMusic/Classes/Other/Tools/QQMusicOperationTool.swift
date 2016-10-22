@@ -78,6 +78,14 @@ class QQMusicOperationTool: NSObject {
         let model = musicsM[currentPlayMusicIndex]
         playMusic(musics: model)
     }
+    /* 设置播放比例是多少 */
+    func setPlayerPlayRotate(progress : CGFloat) {
+        if tool.getCurrnetPlayerPlayRotate() == progress {
+            return
+        }
+        let duration = tool.player?.duration
+        tool.player?.currentTime = TimeInterval(progress) * duration!
+    }
 }
 /* 锁屏解密通信 */
 extension QQMusicOperationTool {

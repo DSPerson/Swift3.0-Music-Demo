@@ -39,6 +39,8 @@ class QQDetailVC: UIViewController {
     @IBOutlet weak var totalTimerLabel: UILabel!
     
     @IBOutlet weak var playButton: UIButton!
+    /* 当前播放比例 */
+    var currentProgress : CGFloat?
     /* 定时器 */
     var timer : Timer?
     /* 界面返回方法 */
@@ -74,6 +76,9 @@ class QQDetailVC: UIViewController {
         setUpKitOnceData()
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
 }
 
@@ -108,6 +113,10 @@ extension QQDetailVC {
     func setUpProgressSlider() -> () {
         
         progressSlider.setThumbImage(UIImage(named:"progressSlider"), for: .normal)
+        
+        progressSlider.addTarget(self, action: #selector(touchProgressSlider(str:)), for: .touchUpInside)
+        progressSlider.addTarget(self, action: #selector(progressSliderValue(str:)), for: .allTouchEvents)
+        
     }
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -117,7 +126,19 @@ extension QQDetailVC {
         self.playButton.isSelected = bool
         
     }
+    func progressSliderValue(str : UISlider) {
+        
+         let tine =  QQMusicOperationTool.shareInstance.tool.player?.currentTime
+        print(tine);
+        let rotate = str.value
+        print(rotate)
+    }
     
+    func touchProgressSlider(str: UISlider) {
+        print("开始点击")
+       self.progressSlider.value = str.value
+        QQMusicOperationTool.shareInstance.setPlayerPlayRotate(progress: CGFloat(self.progressSlider.value))
+    }
     func updateLrc() {
         
        // print("次数")
@@ -152,7 +173,7 @@ extension QQDetailVC {
         self.addLrcView()
         self.setUpProgressSlider()
         
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(nextMusic), name: NSNotification.Name(rawValue: kPlayFinishNotification), object: nil)
     }
     
     override func viewDidLayoutSubviews() {

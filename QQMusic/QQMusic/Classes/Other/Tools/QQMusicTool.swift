@@ -17,6 +17,8 @@ import AVFoundation
     快进
     快退等功能
  */
+
+let kPlayFinishNotification = "kPlayFinishNotification"
 class QQMusicTool: NSObject {
     
     
@@ -43,11 +45,13 @@ class QQMusicTool: NSObject {
         //如果是正在播放则 return
         if player?.url == path {
             player?.play()
+            
             return
         }
         //2 根据路径创建播放器 因为AVAudioPlayer 需要thorw 穿透
         do {
              player = try AVAudioPlayer(contentsOf: path)
+            player?.delegate = self
         } catch {
             print(error)
             return
@@ -56,10 +60,22 @@ class QQMusicTool: NSObject {
         player?.prepareToPlay()
         //4 开始播放
         
-        player?.play() 
+        player?.play()
     }
     /* 暂停 */
     func pauseMusic() -> () {
         player?.pause()
+    }
+    /* 获得当前播放比例 */
+    func getCurrnetPlayerPlayRotate() -> CGFloat {
+        let rotate = (player?.currentTime)! / (player?.duration)!
+        return CGFloat(rotate)
+    }
+}
+
+extension QQMusicTool : AVAudioPlayerDelegate {
+     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: kPlayFinishNotification), object: self, userInfo: nil)
     }
 }
